@@ -4,13 +4,25 @@
     <header class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <NuxtLink to="/" class="text-xl font-bold text-primary">
+          <NuxtLink
+            to="/"
+            class="text-xl font-bold text-primary"
+          >
             FreshDonate
           </NuxtLink>
 
           <nav class="flex items-center gap-4">
-            <UButton to="/" variant="ghost" label="Магазин" icon="i-lucide-store" />
-            <UButton to="/cart" variant="ghost" icon="i-lucide-shopping-cart" />
+            <UButton
+              to="/"
+              variant="ghost"
+              label="Магазин"
+              icon="i-lucide-store"
+            />
+            <UButton
+              to="/cart"
+              variant="ghost"
+              icon="i-lucide-shopping-cart"
+            />
           </nav>
         </div>
       </div>
