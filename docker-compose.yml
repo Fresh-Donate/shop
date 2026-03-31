@@ -1,8 +1,17 @@
 services:
-  service:
-    image: ghcr.io/fresh-incorporated/fresh-frontend:latest
+  shop:
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
       - .env
     ports:
-      - "${SERVER_PORT:-3000}:${PORT:-3000}"
+      - "${SERVER_PORT:-3002}:${PORT:-3002}"
+    networks:
+      - fresh-network
+
+networks:
+  fresh-network:
+    external: true
+    name: fresh-donate-backend_fresh-network
