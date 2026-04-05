@@ -54,8 +54,43 @@ const quantitySuffix: Record<string, string> = {
   other: 'шт.'
 }
 
-function purchase() {
-  // будет реализовано позже
+const config = useRuntimeConfig()
+const purchasing = ref(false)
+const purchaseResult = ref<{ status: string, id: string } | null>(null)
+const purchaseError = ref('')
+
+async function purchase() {
+  purchasing.value = true
+  purchaseError.value = ''
+  purchaseResult.value = null
+
+  try {
+    const result = await $fetch<{ id: string, status: string, externalPaymentUrl: string | null }>('/payments', {
+      baseURL: config.public.apiBase as string,
+      method: 'POST',
+      body: {
+        productId: props.product.id,
+        nickname: nickname.value,
+        email: email.value,
+        paymentOptionId: selectedMethod.value
+      }
+    })
+
+    if (result.status === 'delivered') {
+      // Demo mode — instant success
+      purchaseResult.value = { status: 'delivered', id: result.id }
+    } else if (result.externalPaymentUrl) {
+      // Redirect to payment page
+      window.location.href = result.externalPaymentUrl
+    } else {
+      // Pending, no URL yet (provider not implemented)
+      purchaseResult.value = { status: 'pending', id: result.id }
+    }
+  } catch (err: any) {
+    purchaseError.value = err?.data?.error || 'Произошла ошибка при создании платежа'
+  } finally {
+    purchasing.value = false
+  }
 }
 </script>
 
@@ -222,14 +257,57 @@ function purchase() {
             </span>
           </label>
 
+          <!-- Error -->
+          <div
+            v-if="purchaseError"
+            class="flex gap-3 p-3 rounded-lg bg-error/10 border border-error/20 mt-4"
+          >
+            <UIcon
+              name="i-lucide-alert-circle"
+              class="size-5 text-error shrink-0 mt-0.5"
+            />
+            <p class="text-sm text-error">
+              {{ purchaseError }}
+            </p>
+          </div>
+
+          <!-- Success (demo) -->
+          <div
+            v-if="purchaseResult?.status === 'delivered'"
+            class="flex gap-3 p-3 rounded-lg bg-success/10 border border-success/20 mt-4"
+          >
+            <UIcon
+              name="i-lucide-check-circle"
+              class="size-5 text-success shrink-0 mt-0.5"
+            />
+            <div>
+              <p class="text-sm font-medium text-success">
+                Покупка успешна!
+              </p>
+              <p class="text-xs text-muted mt-0.5">
+                Товар будет выдан в ближайшее время.
+              </p>
+            </div>
+          </div>
+
           <!-- Purchase button -->
           <UButton
+            v-if="!purchaseResult"
             label="Приобрести"
             icon="i-lucide-shopping-cart"
             size="lg"
             class="w-full mt-5"
             :disabled="!nickname || !email || !termsAccepted"
+            :loading="purchasing"
             @click="purchase"
+          />
+          <UButton
+            v-else
+            label="Закрыть"
+            variant="soft"
+            size="lg"
+            class="w-full mt-5"
+            @click="open = false"
           />
         </div>
       </div>
