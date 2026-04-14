@@ -87,7 +87,7 @@ async function purchase() {
       purchaseResult.value = { status: 'pending', id: result.id }
     }
   } catch (err: any) {
-    purchaseError.value = err?.data?.error || 'Произошла ошибка при создании платежа'
+    purchaseError.value = err?.data?.message || err?.data?.error || 'Произошла ошибка при создании платежа'
   } finally {
     purchasing.value = false
   }
