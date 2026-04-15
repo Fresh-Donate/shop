@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process'
+import { writeFileSync } from 'node:fs'
 
 let buildCommit = process.env.GIT_COMMIT || ''
 if (!buildCommit) {
@@ -8,6 +9,8 @@ if (!buildCommit) {
     buildCommit = 'unknown'
   }
 }
+
+writeFileSync('build-info.json', JSON.stringify({ version: '1.0.0', commit: buildCommit }))
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -24,7 +27,6 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
-    buildCommit,
     public: {
       apiBase: 'http://localhost:3001'
     }
