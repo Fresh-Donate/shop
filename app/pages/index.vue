@@ -49,7 +49,7 @@ function openPurchase(productId: string) {
     <!-- Hero -->
     <ShopHeroBanner
       :title="settings.name"
-      server-ip="play.example.com"
+      :server-ip="settings.ip"
     />
 
     <!-- Filters -->
