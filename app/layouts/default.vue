@@ -2,11 +2,13 @@
 const cart = useCartStore()
 const settings = useShopSettingsStore()
 
-const navLinks = [
-  { label: 'Главная', to: '/', icon: 'i-lucide-house' },
-  { label: 'Магазин', to: '/shop', icon: 'i-lucide-store' },
-  { label: 'Правила', to: '/rules', icon: 'i-lucide-scroll-text' }
-]
+interface navLink {
+  label: string
+  to: string
+  icon: string
+}
+
+const navLinks: navLink[] = []
 </script>
 
 <template>
@@ -43,39 +45,7 @@ const navLinks = [
           </nav>
 
           <!-- Right side -->
-          <div class="flex items-center gap-2">
-            <UButton
-              icon="i-lucide-message-circle"
-              variant="ghost"
-              color="neutral"
-              size="sm"
-              square
-            />
-            <UButton
-              to="/cart"
-              variant="ghost"
-              color="neutral"
-              size="sm"
-              square
-            >
-              <UChip
-                v-if="cart.totalItems > 0"
-                :text="String(cart.totalItems)"
-                color="primary"
-                inset
-              >
-                <UIcon
-                  name="i-lucide-shopping-cart"
-                  class="size-5"
-                />
-              </UChip>
-              <UIcon
-                v-else
-                name="i-lucide-shopping-cart"
-                class="size-5"
-              />
-            </UButton>
-          </div>
+          <div class="flex items-center gap-2" />
         </div>
       </div>
     </header>
@@ -108,16 +78,6 @@ const navLinks = [
                 {{ settings.description }}
               </p>
             </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <UButton
-              icon="i-lucide-message-circle"
-              variant="ghost"
-              color="neutral"
-              size="sm"
-              square
-            />
           </div>
         </div>
 
