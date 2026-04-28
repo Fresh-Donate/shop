@@ -3,7 +3,7 @@ import type { Product } from '~/stores/products'
 
 const settings = useShopSettingsStore()
 const productsStore = useProductsStore()
-const config = useRuntimeConfig()
+const requestUrl = useRequestURL()
 
 // Base SEO (title / description / OG / Twitter / canonical).
 useShopSeo({
@@ -13,11 +13,13 @@ useShopSeo({
 
 // JSON-LD: describe the shop as a `Store` and embed the product catalog as
 // an `OfferCatalog`. Search engines use this for rich-result eligibility
-// and Knowledge Graph hints.
-const siteUrl = (config.public.siteUrl as string).replace(/\/+$/, '')
+// and Knowledge Graph hints. Source of truth for the URL is the admin-
+// configured `shopUrl`; live origin is the fallback for fresh installs.
 const currencyCodes = new Set(['RUB', 'USD', 'EUR'])
 
 const jsonLd = computed(() => {
+  const siteUrl = (settings.shopUrl || requestUrl.origin).replace(/\/+$/, '')
+
   const offers = productsStore.items.map(p => ({
     '@type': 'Offer',
     'name': p.name,

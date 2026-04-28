@@ -5,9 +5,8 @@
  * Payment status pages are deliberately excluded — they're per-user and
  * already marked `noindex`. If new public pages are added, list them here.
  */
-export default defineEventHandler((event) => {
-  const config = useRuntimeConfig()
-  const siteUrl = String(config.public.siteUrl || '').replace(/\/+$/, '')
+export default defineEventHandler(async (event) => {
+  const siteUrl = await resolveSiteUrl(event)
   const lastmod = new Date().toISOString().slice(0, 10)
 
   const urls: Array<{ loc: string, changefreq: string, priority: string }> = [

@@ -33,9 +33,15 @@ interface UseShopSeoOptions {
 export function useShopSeo(options: UseShopSeoOptions = {}) {
   const settings = useShopSettingsStore()
   const route = useRoute()
-  const config = useRuntimeConfig()
+  const requestUrl = useRequestURL()
 
-  const siteUrl = (config.public.siteUrl as string).replace(/\/+$/, '')
+  // The shop's public URL is configured in admin → shop settings and lives in
+  // the database. We fall back to the live request origin when the field is
+  // empty (e.g. fresh install, admin hasn't filled it yet) so SEO degrades
+  // gracefully instead of producing `undefined/...` URLs.
+  const siteUrl = computed(() =>
+    (settings.shopUrl || requestUrl.origin).replace(/\/+$/, '')
+  )
 
   const title = computed(() => options.title ?? settings.name)
   const description = computed(() => {
@@ -44,12 +50,12 @@ export function useShopSeo(options: UseShopSeoOptions = {}) {
     return `Донат-магазин ${settings.name}${settings.ip ? ` для сервера ${settings.ip}` : ''}`
   })
 
-  const canonical = computed(() => `${siteUrl}${options.path ?? route.path}`)
+  const canonical = computed(() => `${siteUrl.value}${options.path ?? route.path}`)
 
   const image = computed(() => {
-    if (!options.image) return `${siteUrl}/og-image.png`
+    if (!options.image) return `${siteUrl.value}/og-image.png`
     if (/^https?:\/\//i.test(options.image)) return options.image
-    return `${siteUrl}${options.image.startsWith('/') ? '' : '/'}${options.image}`
+    return `${siteUrl.value}${options.image.startsWith('/') ? '' : '/'}${options.image}`
   })
 
   useSeoMeta({
