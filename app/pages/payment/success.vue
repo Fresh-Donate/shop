@@ -2,6 +2,14 @@
 const route = useRoute()
 const config = useRuntimeConfig()
 
+// Payment-status pages must not be indexed: they're per-user, time-sensitive,
+// and would clutter search results with duplicate content.
+useShopSeo({
+  title: 'Статус платежа',
+  description: 'Проверка статуса вашего платежа.',
+  robots: 'noindex, nofollow'
+})
+
 const paymentId = computed(() => route.query.paymentId as string)
 
 const currencySymbols: Record<string, string> = {
@@ -22,7 +30,7 @@ const payment = ref<PaymentStatus | null>(null)
 const loading = ref(true)
 const error = ref(false)
 
-const statusConfig: Record<string, { icon: string; color: string; title: string; description: string }> = {
+const statusConfig: Record<string, { icon: string, color: string, title: string, description: string }> = {
   delivered: {
     icon: 'i-lucide-check-circle',
     color: 'text-success',

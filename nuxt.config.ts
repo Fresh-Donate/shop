@@ -14,7 +14,11 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:3001'
+      apiBase: 'http://localhost:3001',
+      // Public origin of the shop (no trailing slash). Used to build absolute
+      // URLs for canonical links, Open Graph, Twitter Card and the sitemap.
+      // Override at runtime with `NUXT_PUBLIC_SITE_URL=https://shop.example.com`.
+      siteUrl: 'http://localhost:3002'
     }
   },
 

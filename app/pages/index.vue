@@ -3,6 +3,56 @@ import type { Product } from '~/stores/products'
 
 const settings = useShopSettingsStore()
 const productsStore = useProductsStore()
+const config = useRuntimeConfig()
+
+// Base SEO (title / description / OG / Twitter / canonical).
+useShopSeo({
+  description: settings.description
+    || `Купить донат на сервер ${settings.ip || settings.name}: привилегии, предметы, валюта и многое другое. Мгновенная выдача после оплаты.`
+})
+
+// JSON-LD: describe the shop as a `Store` and embed the product catalog as
+// an `OfferCatalog`. Search engines use this for rich-result eligibility
+// and Knowledge Graph hints.
+const siteUrl = (config.public.siteUrl as string).replace(/\/+$/, '')
+const currencyCodes = new Set(['RUB', 'USD', 'EUR'])
+
+const jsonLd = computed(() => {
+  const offers = productsStore.items.map(p => ({
+    '@type': 'Offer',
+    'name': p.name,
+    'description': p.description || undefined,
+    'price': Number(p.price).toFixed(2),
+    'priceCurrency': currencyCodes.has(p.currency) ? p.currency : 'RUB',
+    'image': p.imageUrl || undefined,
+    'category': p.type,
+    'availability': 'https://schema.org/InStock',
+    'url': siteUrl
+  }))
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    'name': settings.name,
+    'description': settings.description || undefined,
+    'url': siteUrl,
+    'image': `${siteUrl}/og-image.png`,
+    'hasOfferCatalog': {
+      '@type': 'OfferCatalog',
+      'name': `${settings.name} — товары`,
+      'itemListElement': offers
+    }
+  }
+})
+
+useHead({
+  script: [{
+    type: 'application/ld+json',
+    // Stringifying inside `innerHTML` keeps it as a single SSR-rendered tag
+    // rather than a parsed JS module. Search engines parse the inner text.
+    innerHTML: () => JSON.stringify(jsonLd.value)
+  }]
+})
 
 const selectedCategory = ref('all')
 const purchaseOpen = ref(false)
@@ -31,8 +81,7 @@ const categories = computed(() => {
 
 const filteredProducts = computed(() => {
   return productsStore.items.filter((p) => {
-    if (selectedCategory.value !== 'all' && p.type !== selectedCategory.value) return false
-    return true
+    return !(selectedCategory.value !== 'all' && p.type !== selectedCategory.value)
   })
 })
 
