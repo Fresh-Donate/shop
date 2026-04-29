@@ -54,6 +54,12 @@ const statusConfig: Record<string, { icon: string, color: string, title: string,
     color: 'text-error',
     title: 'Платёж не прошёл',
     description: 'Произошла ошибка при оплате. Попробуйте снова.'
+  },
+  expired: {
+    icon: 'i-lucide-clock-alert',
+    color: 'text-muted',
+    title: 'Срок оплаты истёк',
+    description: 'Платёжная сессия закрылась. Создайте новый платёж в магазине.'
   }
 }
 
@@ -181,7 +187,7 @@ const symbol = computed(() => {
             <span class="text-sm text-muted">Статус</span>
             <UBadge
               :label="currentStatus!.title"
-              :color="payment.status === 'delivered' || payment.status === 'paid' ? 'success' : payment.status === 'failed' ? 'error' : 'warning'"
+              :color="payment.status === 'delivered' || payment.status === 'paid' ? 'success' : payment.status === 'failed' ? 'error' : payment.status === 'expired' ? 'neutral' : 'warning'"
               variant="subtle"
               size="sm"
             />
