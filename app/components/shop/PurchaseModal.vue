@@ -141,12 +141,14 @@ async function onSubmit() {
         <div class="sm:w-72 shrink-0 p-6 border-b sm:border-b-0 sm:border-r border-default bg-elevated/50">
           <!-- Image -->
           <div class="aspect-square rounded-xl overflow-hidden bg-muted/10 mb-4">
-            <NuxtImg
+            <img
               v-if="product.imageUrl"
               :src="product.imageUrl"
               :alt="product.name"
+              loading="lazy"
+              decoding="async"
               class="size-full object-cover"
-            />
+            >
             <div
               v-else
               class="size-full flex items-center justify-center"

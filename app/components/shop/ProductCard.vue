@@ -17,12 +17,14 @@ const emit = defineEmits<{
   <div class="group rounded-xl border border-default bg-elevated overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
     <!-- Image -->
     <div class="aspect-square bg-muted/10 overflow-hidden">
-      <NuxtImg
+      <img
         v-if="props.imageUrl"
         :src="props.imageUrl"
         :alt="props.name"
+        loading="lazy"
+        decoding="async"
         class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-      />
+      >
       <div
         v-else
         class="size-full flex items-center justify-center"
