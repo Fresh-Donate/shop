@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { z } from 'zod'
 import type { Product } from '~/stores/products'
 
 const props = defineProps<{
@@ -17,11 +18,47 @@ const symbol = computed(() => currencySymbols[props.product.currency] || props.p
 
 const paymentOptionsStore = usePaymentOptionsStore()
 
-const nickname = ref('')
-const email = ref('')
-const selectedMethod = ref('')
-const count = ref(1)
-const termsAccepted = ref(false)
+// Mirrors the JSON Schema enforced by the backend at POST /payments
+// (see fresh-donate-backend/src/routes/payments/index.ts). Keep in sync.
+// Nickname rules follow Minecraft Java Edition: 3..16 chars of [a-zA-Z0-9_].
+const baseShape = {
+  nickname: z.string()
+    .min(3, 'Минимум 3 символа')
+    .max(16, 'Максимум 16 символов')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Только латиница, цифры и нижнее подчёркивание'),
+  email: z.string().min(1, 'Введите почту').email('Некорректный email').max(256, 'Максимум 256 символов'),
+  paymentOptionId: z.string().min(1, 'Выберите способ оплаты'),
+  termsAccepted: z.boolean().refine(v => v === true, { message: 'Нужно принять условия' })
+}
+
+const schema = computed(() => {
+  if (props.product.allowCustomCount) {
+    return z.object({
+      ...baseShape,
+      count: z.number({ message: 'Введите количество' })
+        .int('Должно быть целое число')
+        .min(1, 'Минимум 1')
+        .max(100000, 'Максимум 100 000')
+    })
+  }
+  return z.object(baseShape)
+})
+
+interface FormState {
+  nickname: string
+  email: string
+  paymentOptionId: string
+  count: number
+  termsAccepted: boolean
+}
+
+const state = reactive<FormState>({
+  nickname: '',
+  email: '',
+  paymentOptionId: '',
+  count: 1,
+  termsAccepted: false
+})
 
 const paymentMethods = computed(() =>
   paymentOptionsStore.items.map(o => ({
@@ -32,14 +69,12 @@ const paymentMethods = computed(() =>
 )
 
 watch(paymentMethods, (methods) => {
-  if (methods.length > 0 && !methods.find(m => m.id === selectedMethod.value)) {
-    selectedMethod.value = methods[0].id
+  if (methods.length > 0 && !methods.find(m => m.id === state.paymentOptionId)) {
+    state.paymentOptionId = methods[0]!.id
   }
 }, { immediate: true })
 
-const totalPrice = computed(() => {
-  return props.product.price
-})
+const totalPrice = computed(() => props.product.price)
 
 const typeLabels: Record<string, string> = {
   item: 'Предмет',
@@ -60,7 +95,7 @@ const purchasing = ref(false)
 const purchaseResult = ref<{ status: string, id: string } | null>(null)
 const purchaseError = ref('')
 
-async function purchase() {
+async function onSubmit() {
   purchasing.value = true
   purchaseError.value = ''
   purchaseResult.value = null
@@ -71,21 +106,18 @@ async function purchase() {
       method: 'POST',
       body: {
         productId: props.product.id,
-        nickname: nickname.value,
-        email: email.value,
-        count: props.product.allowCustomCount ? count.value : undefined,
-        paymentOptionId: selectedMethod.value
+        nickname: state.nickname,
+        email: state.email,
+        count: props.product.allowCustomCount ? state.count : undefined,
+        paymentOptionId: state.paymentOptionId
       }
     })
 
     if (result.status === 'delivered') {
-      // Demo mode — instant success
       purchaseResult.value = { status: 'delivered', id: result.id }
     } else if (result.externalPaymentUrl) {
-      // Redirect to payment page
       window.location.href = result.externalPaymentUrl
     } else {
-      // Pending, no URL yet (provider not implemented)
       purchaseResult.value = { status: 'pending', id: result.id }
     }
   } catch (err: any) {
@@ -196,137 +228,162 @@ async function purchase() {
             Для покупки товара заполните форму ниже:
           </p>
 
-          <div class="space-y-3">
-            <UInput
-              v-model="nickname"
-              placeholder="Введите никнейм"
-              icon="i-lucide-user"
-              size="lg"
-              class="w-full"
-            />
+          <UForm
+            :schema="schema"
+            :state="state"
+            class="space-y-3"
+            @submit="onSubmit"
+          >
+            <UFormField name="nickname">
+              <UInput
+                v-model="state.nickname"
+                placeholder="Введите никнейм"
+                icon="i-lucide-user"
+                size="lg"
+                class="w-full"
+              />
+            </UFormField>
 
-            <UInput
-              v-model="email"
-              type="email"
-              placeholder="Введите почту"
-              icon="i-lucide-mail"
-              size="lg"
-              class="w-full"
-            />
+            <UFormField name="email">
+              <UInput
+                v-model="state.email"
+                type="email"
+                placeholder="Введите почту"
+                icon="i-lucide-mail"
+                size="lg"
+                class="w-full"
+              />
+            </UFormField>
 
-            <UInput
+            <UFormField
               v-if="product.allowCustomCount"
-              v-model="count"
-              type="number"
-              placeholder="Введите количество"
-              icon="i-lucide-bolt"
-              size="lg"
-              class="w-full"
-            />
-          </div>
+              name="count"
+            >
+              <UInput
+                v-model.number="state.count"
+                type="number"
+                placeholder="Введите количество"
+                icon="i-lucide-bolt"
+                size="lg"
+                :min="1"
+                :max="100000"
+                class="w-full"
+              />
+            </UFormField>
 
-          <!-- Payment methods -->
-          <p
-            v-if="paymentMethods.length > 1"
-            class="text-sm font-medium mt-5 mb-3"
-          >
-            Выберите способ оплаты:
-          </p>
+            <!-- Payment methods -->
+            <UFormField
+              name="paymentOptionId"
+              class="!mt-5"
+            >
+              <p
+                v-if="paymentMethods.length > 1"
+                class="text-sm font-medium mb-3"
+              >
+                Выберите способ оплаты:
+              </p>
 
-          <div
-            v-if="paymentMethods.length > 1"
-            class="grid grid-cols-2 gap-2"
-          >
-            <button
-              v-for="method in paymentMethods"
-              :key="method.id"
-              type="button"
-              class="flex items-center gap-2.5 p-3 rounded-lg border text-sm font-medium transition-all cursor-pointer text-left"
-              :class="selectedMethod === method.id
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-default bg-elevated hover:border-muted'"
-              @click="selectedMethod = method.id"
+              <div
+                v-if="paymentMethods.length > 1"
+                class="grid grid-cols-2 gap-2"
+              >
+                <button
+                  v-for="method in paymentMethods"
+                  :key="method.id"
+                  type="button"
+                  class="flex items-center gap-2.5 p-3 rounded-lg border text-sm font-medium transition-all cursor-pointer text-left"
+                  :class="state.paymentOptionId === method.id
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-default bg-elevated hover:border-muted'"
+                  @click="state.paymentOptionId = method.id"
+                >
+                  <UIcon
+                    :name="method.icon"
+                    class="size-4 shrink-0"
+                  />
+                  <span>{{ method.label }}</span>
+                </button>
+              </div>
+            </UFormField>
+
+            <!-- Terms -->
+            <UFormField
+              name="termsAccepted"
+              class="!mt-5"
+            >
+              <label class="flex items-start gap-2.5 cursor-pointer">
+                <UCheckbox v-model="state.termsAccepted" />
+                <span class="text-xs text-muted leading-relaxed">
+                  Я принимаю условия
+                  <NuxtLink
+                    to="/legal/terms"
+                    class="text-primary hover:underline"
+                  >пользовательского соглашения</NuxtLink>,
+                  <NuxtLink
+                    to="/legal/offer"
+                    class="text-primary hover:underline"
+                  >публичной оферты</NuxtLink>, и
+                  <NuxtLink
+                    to="/legal/privacy"
+                    class="text-primary hover:underline"
+                  >политики конфиденциальности</NuxtLink>
+                </span>
+              </label>
+            </UFormField>
+
+            <!-- Error -->
+            <div
+              v-if="purchaseError"
+              class="flex gap-3 p-3 rounded-lg bg-error/10 border border-error/20 mt-4"
             >
               <UIcon
-                :name="method.icon"
-                class="size-4 shrink-0"
+                name="i-lucide-alert-circle"
+                class="size-5 text-error shrink-0 mt-0.5"
               />
-              <span>{{ method.label }}</span>
-            </button>
-          </div>
-
-          <!-- Terms -->
-          <label class="flex items-start gap-2.5 mt-5 cursor-pointer">
-            <UCheckbox v-model="termsAccepted" />
-            <span class="text-xs text-muted leading-relaxed">
-              Я принимаю условия
-              <NuxtLink
-                to="/legal/terms"
-                class="text-primary hover:underline"
-              >пользовательского соглашения</NuxtLink>,
-              <NuxtLink
-                to="/legal/offer"
-                class="text-primary hover:underline"
-              >публичной оферты</NuxtLink>, и
-              <NuxtLink
-                to="/legal/privacy"
-                class="text-primary hover:underline"
-              >политики конфиденциальности</NuxtLink>
-            </span>
-          </label>
-
-          <!-- Error -->
-          <div
-            v-if="purchaseError"
-            class="flex gap-3 p-3 rounded-lg bg-error/10 border border-error/20 mt-4"
-          >
-            <UIcon
-              name="i-lucide-alert-circle"
-              class="size-5 text-error shrink-0 mt-0.5"
-            />
-            <p class="text-sm text-error">
-              {{ purchaseError }}
-            </p>
-          </div>
-
-          <!-- Success (demo) -->
-          <div
-            v-if="purchaseResult?.status === 'delivered'"
-            class="flex gap-3 p-3 rounded-lg bg-success/10 border border-success/20 mt-4"
-          >
-            <UIcon
-              name="i-lucide-check-circle"
-              class="size-5 text-success shrink-0 mt-0.5"
-            />
-            <div>
-              <p class="text-sm font-medium text-success">
-                Покупка успешна!
-              </p>
-              <p class="text-xs text-muted mt-0.5">
-                Товар будет выдан в ближайшее время.
+              <p class="text-sm text-error">
+                {{ purchaseError }}
               </p>
             </div>
-          </div>
 
-          <!-- Purchase button -->
-          <UButton
-            v-if="!purchaseResult"
-            label="Приобрести"
-            icon="i-lucide-shopping-cart"
-            size="lg"
-            class="w-full mt-5"
-            :disabled="!nickname || !email || !termsAccepted"
-            :loading="purchasing"
-            @click="purchase"
-          />
-          <UButton
-            v-else
-            label="Закрыть"
-            variant="soft"
-            size="lg"
-            class="w-full mt-5"
-            @click="open = false"
-          />
+            <!-- Success (demo) -->
+            <div
+              v-if="purchaseResult?.status === 'delivered'"
+              class="flex gap-3 p-3 rounded-lg bg-success/10 border border-success/20 mt-4"
+            >
+              <UIcon
+                name="i-lucide-check-circle"
+                class="size-5 text-success shrink-0 mt-0.5"
+              />
+              <div>
+                <p class="text-sm font-medium text-success">
+                  Покупка успешна!
+                </p>
+                <p class="text-xs text-muted mt-0.5">
+                  Товар будет выдан в ближайшее время.
+                </p>
+              </div>
+            </div>
+
+            <!-- Purchase button -->
+            <UButton
+              v-if="!purchaseResult"
+              type="submit"
+              label="Приобрести"
+              icon="i-lucide-shopping-cart"
+              size="lg"
+              class="w-full !mt-5"
+              :loading="purchasing"
+            />
+            <UButton
+              v-else
+              type="button"
+              label="Закрыть"
+              variant="soft"
+              size="lg"
+              class="w-full !mt-5"
+              @click="open = false"
+            />
+          </UForm>
         </div>
       </div>
     </template>
