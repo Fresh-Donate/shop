@@ -226,11 +226,17 @@ async function purchase() {
           </div>
 
           <!-- Payment methods -->
-          <p class="text-sm font-medium mt-5 mb-3">
+          <p
+            v-if="paymentMethods.length > 1"
+            class="text-sm font-medium mt-5 mb-3"
+          >
             Выберите способ оплаты:
           </p>
 
-          <div class="grid grid-cols-2 gap-2">
+          <div
+            v-if="paymentMethods.length > 1"
+            class="grid grid-cols-2 gap-2"
+          >
             <button
               v-for="method in paymentMethods"
               :key="method.id"
