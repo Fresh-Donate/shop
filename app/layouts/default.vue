@@ -59,7 +59,7 @@ const navLinks: navLink[] = []
     <footer class="border-t border-default">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Footer top -->
-        <div class="flex items-center justify-between py-6">
+        <div class="flex flex-col gap-6 py-6 md:flex-row md:items-center md:justify-between">
           <div class="flex items-center gap-3">
             <div class="size-10 rounded-lg bg-primary flex items-center justify-center">
               <UIcon
@@ -79,6 +79,27 @@ const navLinks: navLink[] = []
               </p>
             </div>
           </div>
+
+          <nav class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <NuxtLink
+              to="/legal/offer"
+              class="text-muted hover:text-default"
+            >
+              Публичная оферта
+            </NuxtLink>
+            <NuxtLink
+              to="/legal/terms"
+              class="text-muted hover:text-default"
+            >
+              Пользовательское соглашение
+            </NuxtLink>
+            <NuxtLink
+              to="/legal/privacy"
+              class="text-muted hover:text-default"
+            >
+              Политика конфиденциальности
+            </NuxtLink>
+          </nav>
         </div>
 
         <!-- Footer bottom -->

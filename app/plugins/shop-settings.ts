@@ -4,7 +4,17 @@ export default defineNuxtPlugin(async () => {
   const appConfig = useAppConfig()
 
   const { data } = await useAsyncData('shop-settings', () =>
-    $fetch<{ name: string, description: string, color: string, ip: string, shopUrl: string }>('/shop-settings', {
+    $fetch<{
+      name: string
+      description: string
+      color: string
+      ip: string
+      shopUrl: string
+      ownerName: string
+      ownerType: '' | 'individual' | 'self_employed' | 'sole_proprietor' | 'legal_entity'
+      ownerInn: string
+      contactEmail: string
+    }>('/shop-settings', {
       baseURL: config.public.apiBase as string
     })
   )

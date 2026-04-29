@@ -261,17 +261,17 @@ async function purchase() {
             <span class="text-xs text-muted leading-relaxed">
               Я принимаю условия
               <NuxtLink
-                to="/terms"
+                to="/legal/terms"
                 class="text-primary hover:underline"
               >пользовательского соглашения</NuxtLink>,
               <NuxtLink
-                to="/agency"
+                to="/legal/offer"
                 class="text-primary hover:underline"
-              >агентский договор</NuxtLink>, и
+              >публичной оферты</NuxtLink>, и
               <NuxtLink
-                to="/donation"
+                to="/legal/privacy"
                 class="text-primary hover:underline"
-              >договор пожертвования</NuxtLink>
+              >политики конфиденциальности</NuxtLink>
             </span>
           </label>
 
