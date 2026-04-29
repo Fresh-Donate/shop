@@ -60,13 +60,13 @@ const currencySymbol = computed(() => props.currency || '₽')
         v-if="hasDiscount"
         class="absolute top-2 left-2 flex flex-col items-start gap-1"
       >
-        <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-primary text-inverted shadow">
-          −{{ props.discountPercent }}%
-        </span>
+        <!--        <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-primary text-inverted shadow"> -->
+        <!--          −{{ props.discountPercent }}% -->
+        <!--        </span> -->
         <span
           v-for="promo in props.activePromotions"
           :key="promo.id"
-          class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-elevated/95 text-default border border-default backdrop-blur-sm"
+          class="px-2 py-0.5 rounded-md text-xs font-bold bg-primary text-inverted shadow"
         >
           {{ promo.name }}
         </span>
