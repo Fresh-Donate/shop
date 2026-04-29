@@ -20,6 +20,7 @@ const paymentOptionsStore = usePaymentOptionsStore()
 const nickname = ref('')
 const email = ref('')
 const selectedMethod = ref('')
+const count = ref(1)
 const termsAccepted = ref(false)
 
 const paymentMethods = computed(() =>
@@ -72,6 +73,7 @@ async function purchase() {
         productId: props.product.id,
         nickname: nickname.value,
         email: email.value,
+        count: props.product.allowCustomCount ? count.value : undefined,
         paymentOptionId: selectedMethod.value
       }
     })
@@ -208,6 +210,16 @@ async function purchase() {
               type="email"
               placeholder="Введите почту"
               icon="i-lucide-mail"
+              size="lg"
+              class="w-full"
+            />
+
+            <UInput
+              v-if="product.allowCustomCount"
+              v-model="count"
+              type="number"
+              placeholder="Введите количество"
+              icon="i-lucide-bolt"
               size="lg"
               class="w-full"
             />

@@ -8,6 +8,7 @@ export interface Product {
   type: string
   commands: string[]
   imageUrl?: string
+  allowCustomCount: boolean
   createdAt: string
   updatedAt: string
 }
