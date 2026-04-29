@@ -1,3 +1,9 @@
+export interface ProductPromotion {
+  id: string
+  name: string
+  discountPercent: number
+}
+
 export interface Product {
   id: string
   name: string
@@ -9,6 +15,12 @@ export interface Product {
   commands: string[]
   imageUrl?: string
   allowCustomCount: boolean
+  /** Promotions currently in effect on this product. */
+  activePromotions?: ProductPromotion[]
+  /** Stacked discount %, capped at 100. */
+  discountPercent?: number
+  /** Price after `discountPercent` is applied (== `price` when no discount). */
+  discountedPrice?: number
   createdAt: string
   updatedAt: string
 }

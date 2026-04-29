@@ -140,6 +140,9 @@ function openPurchase(productId: string) {
         :quantity="product.quantity"
         :currency="currencySymbols[product.currency] || product.currency"
         :image-url="product.imageUrl"
+        :active-promotions="product.activePromotions"
+        :discount-percent="product.discountPercent"
+        :discounted-price="product.discountedPrice"
         @add-to-cart="openPurchase"
       />
     </div>

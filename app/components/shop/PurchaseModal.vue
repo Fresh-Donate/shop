@@ -74,7 +74,31 @@ watch(paymentMethods, (methods) => {
   }
 }, { immediate: true })
 
-const totalPrice = computed(() => props.product.price)
+// Discount-aware unit price: prefer the backend's `discountedPrice` (which
+// already accounts for stacked promo %), fall back to raw `price` when no
+// promotion is active. The shop and the backend use the same helper, so
+// what we display here matches what `PaymentService.create` will charge.
+const hasDiscount = computed(() =>
+  (props.product.discountPercent ?? 0) > 0
+  && props.product.discountedPrice !== undefined
+  && props.product.discountedPrice < props.product.price
+)
+const unitPrice = computed(() =>
+  hasDiscount.value ? (props.product.discountedPrice as number) : props.product.price
+)
+const unitOriginalPrice = computed(() => props.product.price)
+
+// Total reflects the count for custom-count products — for fixed-count
+// items count is always 1, so the total equals the unit price.
+const effectiveCount = computed(() =>
+  props.product.allowCustomCount ? Math.max(1, Number(state.count) || 1) : 1
+)
+const totalPrice = computed(() =>
+  Math.round(unitPrice.value * effectiveCount.value * 100) / 100
+)
+const totalOriginalPrice = computed(() =>
+  Math.round(unitOriginalPrice.value * effectiveCount.value * 100) / 100
+)
 
 const typeLabels: Record<string, string> = {
   item: 'Предмет',
@@ -165,8 +189,34 @@ async function onSubmit() {
             {{ product.name }}
           </h3>
 
-          <div class="flex items-baseline gap-1.5 mt-1">
-            <span class="text-xl font-bold text-primary">{{ product.price.toLocaleString() }}{{ symbol }}</span>
+          <!-- Promo badges (when active). Same names the shop card shows,
+               so the buyer sees which campaigns are stacking. -->
+          <div
+            v-if="hasDiscount"
+            class="flex flex-wrap gap-1.5 mt-2"
+          >
+            <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-primary text-inverted">
+              −{{ product.discountPercent }}%
+            </span>
+            <span
+              v-for="promo in product.activePromotions"
+              :key="promo.id"
+              class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-elevated text-default border border-default"
+            >
+              {{ promo.name }}
+            </span>
+          </div>
+
+          <div class="flex items-baseline gap-1.5 mt-2">
+            <span class="text-xl font-bold text-primary tabular-nums">
+              {{ unitPrice.toLocaleString() }}{{ symbol }}
+            </span>
+            <span
+              v-if="hasDiscount"
+              class="text-sm text-muted line-through tabular-nums"
+            >
+              {{ unitOriginalPrice.toLocaleString() }}{{ symbol }}
+            </span>
             <span class="text-sm text-muted">/ {{ product.quantity }} {{ quantitySuffix[product.type] || 'шт.' }}</span>
           </div>
 
@@ -206,7 +256,17 @@ async function onSubmit() {
           <!-- Total -->
           <div class="flex items-center justify-between mb-4">
             <span class="font-semibold">Итого:</span>
-            <span class="text-xl font-bold text-primary">{{ totalPrice.toLocaleString() }}{{ symbol }}</span>
+            <div class="flex items-baseline gap-2">
+              <span
+                v-if="hasDiscount"
+                class="text-sm text-muted line-through tabular-nums"
+              >
+                {{ totalOriginalPrice.toLocaleString() }}{{ symbol }}
+              </span>
+              <span class="text-xl font-bold text-primary tabular-nums">
+                {{ totalPrice.toLocaleString() }}{{ symbol }}
+              </span>
+            </div>
           </div>
 
           <!-- Warning -->
