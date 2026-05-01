@@ -4,6 +4,12 @@ export interface ProductPromotion {
   discountPercent: number
 }
 
+export interface ProductGroup {
+  id: string
+  name: string
+  upgradeMode: boolean
+}
+
 export interface Product {
   id: string
   name: string
@@ -21,6 +27,8 @@ export interface Product {
   discountPercent?: number
   /** Price after `discountPercent` is applied (== `price` when no discount). */
   discountedPrice?: number
+  /** Groups the product belongs to (used by upgrade-mode preview UI). */
+  groups?: ProductGroup[]
   createdAt: string
   updatedAt: string
 }

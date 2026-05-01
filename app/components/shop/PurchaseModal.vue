@@ -74,24 +74,43 @@ watch(paymentMethods, (methods) => {
   }
 }, { immediate: true })
 
-// Discount-aware unit price: prefer the backend's `discountedPrice` (which
-// already accounts for stacked promo %), fall back to raw `price` when no
-// promotion is active. The shop and the backend use the same helper, so
-// what we display here matches what `PaymentService.create` will charge.
-const hasDiscount = computed(() =>
+// Privilege products are rank-style: count is forced to 1, the input is
+// hidden, and any upgrade-mode group on the product can drive a server
+// preview ("доплата") in real time as the buyer types their nickname.
+const isPrivilege = computed(() => props.product.type === 'privilege')
+
+// Live preview of the actual charge, debounced server-side. Only kicks in
+// once the buyer types a valid Minecraft nickname; until then we render
+// the static promo-aware price.
+const { preview, loading: previewLoading, error: previewError } = useUpgradePreview(
+  () => props.product.id,
+  () => state.nickname
+)
+
+const promoDiscount = computed(() =>
   (props.product.discountPercent ?? 0) > 0
   && props.product.discountedPrice !== undefined
   && props.product.discountedPrice < props.product.price
 )
-const unitPrice = computed(() =>
-  hasDiscount.value ? (props.product.discountedPrice as number) : props.product.price
-)
+
+// Unit price the buyer actually pays. Preference order:
+//   1. preview.finalUnitPrice (post-promo, post-upgrade) — when available.
+//   2. product.discountedPrice (post-promo only) — promo is active but no
+//      preview yet (nickname empty / typing).
+//   3. product.price (sticker).
+const unitPrice = computed(() => {
+  if (preview.value && !preview.value.blocked) return preview.value.finalUnitPrice
+  if (promoDiscount.value) return props.product.discountedPrice as number
+  return props.product.price
+})
 const unitOriginalPrice = computed(() => props.product.price)
 
-// Total reflects the count for custom-count products — for fixed-count
-// items count is always 1, so the total equals the unit price.
 const effectiveCount = computed(() =>
-  props.product.allowCustomCount ? Math.max(1, Number(state.count) || 1) : 1
+  isPrivilege.value
+    ? 1
+    : props.product.allowCustomCount
+      ? Math.max(1, Number(state.count) || 1)
+      : 1
 )
 const totalPrice = computed(() =>
   Math.round(unitPrice.value * effectiveCount.value * 100) / 100
@@ -99,6 +118,14 @@ const totalPrice = computed(() =>
 const totalOriginalPrice = computed(() =>
   Math.round(unitOriginalPrice.value * effectiveCount.value * 100) / 100
 )
+
+// Show the struck-through old price whenever the buyer is paying less than
+// sticker — could be promo, upgrade, or both stacked.
+const hasDiscount = computed(() => unitPrice.value < unitOriginalPrice.value)
+
+const upgradeBlocked = computed(() => preview.value?.blocked === true)
+const upgradeDiscount = computed(() => preview.value?.upgradeDiscount ?? 0)
+const hasUpgradeDiscount = computed(() => upgradeDiscount.value > 0 && !upgradeBlocked.value)
 
 const typeLabels: Record<string, string> = {
   item: 'Предмет',
@@ -318,7 +345,7 @@ async function onSubmit() {
             </UFormField>
 
             <UFormField
-              v-if="product.allowCustomCount"
+              v-if="product.allowCustomCount && !isPrivilege"
               name="count"
             >
               <UInput
@@ -332,6 +359,71 @@ async function onSubmit() {
                 class="w-full"
               />
             </UFormField>
+
+            <!-- Upgrade-mode preview readout. Three states:
+                 - blocked: red callout, кнопка дизейблится ниже.
+                 - discount: green callout с суммой доплаты.
+                 - clean: ничего не рендерим (preview === null или 0). -->
+            <div
+              v-if="upgradeBlocked"
+              class="flex gap-3 p-3 rounded-lg bg-error/10 border border-error/20 mt-1"
+            >
+              <UIcon
+                name="i-lucide-shield-alert"
+                class="size-5 text-error shrink-0 mt-0.5"
+              />
+              <div>
+                <p class="text-sm font-medium text-error">
+                  Покупка заблокирована
+                </p>
+                <p class="text-xs text-muted mt-0.5">
+                  <template v-if="preview?.reference">
+                    На никнейме «{{ state.nickname }}» уже есть «{{ preview.reference.productName }}» из этой группы — выберите более дорогой товар.
+                  </template>
+                  <template v-else>
+                    На этом нике уже куплен товар из этой группы.
+                  </template>
+                </p>
+              </div>
+            </div>
+
+            <div
+              v-else-if="hasUpgradeDiscount"
+              class="flex gap-3 p-3 rounded-lg bg-success/10 border border-success/20 mt-1"
+            >
+              <UIcon
+                name="i-lucide-arrow-up-right"
+                class="size-5 text-success shrink-0 mt-0.5"
+              />
+              <div>
+                <p class="text-sm font-medium text-success">
+                  Доплата −{{ upgradeDiscount.toLocaleString() }}{{ symbol }}
+                </p>
+                <p class="text-xs text-muted mt-0.5">
+                  <template v-if="preview?.reference">
+                    Учтена стоимость «{{ preview.reference.productName }}» — вы уже владеете этой позицией.
+                  </template>
+                </p>
+              </div>
+            </div>
+
+            <p
+              v-else-if="previewLoading && state.nickname.length >= 3"
+              class="text-xs text-muted mt-1"
+            >
+              <UIcon
+                name="i-lucide-loader-circle"
+                class="size-3.5 animate-spin inline-block mr-1"
+              />
+              Проверяем цену...
+            </p>
+            <!-- previewError тихо игнорируем: лучше показать обычную цену,
+                 чем пугать пользователя сетевой ошибкой preview. Фактическая
+                 проверка всё равно случится при создании платежа. -->
+            <span
+              v-if="previewError"
+              class="hidden"
+            >{{ previewError }}</span>
 
             <!-- Payment methods -->
             <UFormField
@@ -435,6 +527,7 @@ async function onSubmit() {
               size="lg"
               class="w-full !mt-5"
               :loading="purchasing"
+              :disabled="upgradeBlocked"
             />
             <UButton
               v-else
