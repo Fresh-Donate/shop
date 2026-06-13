@@ -211,6 +211,7 @@ async function onSubmit() {
     :ui="{
       content: 'sm:max-w-3xl'
     }"
+    scrollable
   >
     <template #content>
       <div class="flex flex-col sm:flex-row">
