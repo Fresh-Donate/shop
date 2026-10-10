@@ -3,7 +3,7 @@
 > Публичная витрина, через которую игроки выбирают донаты и оплачивают их.
 
 Часть проекта **FreshDonate** - open‑source платформы донатов для Minecraft‑серверов.
-См. также: [Backend](https://github.com/Fresh-Donate/backend) · [Админ‑панель](https://github.com/Fresh-Donate/panel) · [Minecraft‑плагин](https://github.com/Fresh-Donate/fresh-donate-plugin) · [English README](README.md)
+См. также: [Backend](https://github.com/Fresh-Donate/backend) · [Админ‑панель](https://github.com/Fresh-Donate/panel) · [Minecraft‑плагин](https://github.com/Fresh-Donate/plugin) · [English README](README.md)
 
 ---
 
@@ -18,7 +18,7 @@ FreshDonate - самохостимая система приёма донато�
 | [fresh-donate-backend](https://github.com/Fresh-Donate/backend) | Fastify API, платежи, вебхуки, очередь доставки |
 | **fresh-donate-shop** *(этот)* | Публичная витрина для игроков (Nuxt) |
 | [fresh-donate-panel](https://github.com/Fresh-Donate/panel) | Админка для владельца (Nuxt) |
-| [fresh-donate-plugin](https://github.com/Fresh-Donate/fresh-donate-plugin) | Плагин Minecraft, выдающий покупки в игре |
+| [fresh-donate-plugin](https://github.com/Fresh-Donate/plugin) | Плагин Minecraft, выдающий покупки в игре |
 
 ## Роль этого репозитория
 
@@ -101,7 +101,7 @@ server/          Nuxt server routes (если есть)
 
 - [fresh-donate-backend](https://github.com/Fresh-Donate/backend) - REST API, с которым работает магазин
 - [fresh-donate-panel](https://github.com/Fresh-Donate/panel) - админ‑панель
-- [fresh-donate-plugin](https://github.com/Fresh-Donate/fresh-donate-plugin) - плагин доставки для Minecraft
+- [fresh-donate-plugin](https://github.com/Fresh-Donate/plugin) - плагин доставки для Minecraft
 
 ## Лицензия
 

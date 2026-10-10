@@ -3,7 +3,7 @@
 > Public storefront where players browse donations and pay.
 
 Part of the **FreshDonate** open‑source donation platform for Minecraft servers.
-See also: [Backend](https://github.com/Fresh-Donate/backend) · [Admin Panel](https://github.com/Fresh-Donate/panel) · [Minecraft Plugin](https://github.com/Fresh-Donate/fresh-donate-plugin) · [Russian README](README.ru.md)
+See also: [Backend](https://github.com/Fresh-Donate/backend) · [Admin Panel](https://github.com/Fresh-Donate/panel) · [Minecraft Plugin](https://github.com/Fresh-Donate/plugin) · [Russian README](README.ru.md)
 
 ---
 
@@ -18,7 +18,7 @@ The platform is split into four repositories:
 | [fresh-donate-backend](https://github.com/Fresh-Donate/backend) | Fastify API, payments, webhooks, delivery queue |
 | **fresh-donate-shop** *(this repo)* | Public storefront for players (Nuxt) |
 | [fresh-donate-panel](https://github.com/Fresh-Donate/panel) | Admin panel for owners (Nuxt) |
-| [fresh-donate-plugin](https://github.com/Fresh-Donate/fresh-donate-plugin) | Minecraft plugin that delivers purchases in‑game |
+| [fresh-donate-plugin](https://github.com/Fresh-Donate/plugin) | Minecraft plugin that delivers purchases in‑game |
 
 ## Role of this repository
 
@@ -101,7 +101,7 @@ server/          Nuxt server routes (if any)
 
 - [fresh-donate-backend](https://github.com/Fresh-Donate/backend) - REST API this shop talks to
 - [fresh-donate-panel](https://github.com/Fresh-Donate/panel) - admin panel
-- [fresh-donate-plugin](https://github.com/Fresh-Donate/fresh-donate-plugin) - Minecraft delivery plugin
+- [fresh-donate-plugin](https://github.com/Fresh-Donate/plugin) - Minecraft delivery plugin
 
 ## License
 
