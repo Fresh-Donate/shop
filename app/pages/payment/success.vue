@@ -41,7 +41,7 @@ const statusConfig: Record<string, { icon: string, color: string, title: string,
     icon: 'i-lucide-check-circle',
     color: 'text-success',
     title: 'Покупка успешна!',
-    description: 'Товар был выдан. Проверьте свой инвентарь на сервере.'
+    description: 'Товар выдан на сервере.'
   },
   paid: {
     icon: 'i-lucide-clock',
@@ -53,19 +53,19 @@ const statusConfig: Record<string, { icon: string, color: string, title: string,
     icon: 'i-lucide-loader-circle',
     color: 'text-warning',
     title: 'Ожидание оплаты',
-    description: 'Платёж обрабатывается платёжной системой. Подождите немного...'
+    description: 'Платёж обрабатывается платёжной системой.'
   },
   failed: {
     icon: 'i-lucide-x-circle',
     color: 'text-error',
     title: 'Платёж не прошёл',
-    description: 'Произошла ошибка при оплате. Попробуйте снова.'
+    description: 'Попробуйте оплатить ещё раз.'
   },
   expired: {
     icon: 'i-lucide-clock-alert',
     color: 'text-muted',
     title: 'Срок оплаты истёк',
-    description: 'Платёжная сессия закрылась. Создайте новый платёж в магазине.'
+    description: 'Оформите покупку заново.'
   }
 }
 
@@ -152,9 +152,6 @@ const productLabel = computed(() => {
         <h2 class="text-xl font-bold mt-4">
           Платёж не найден
         </h2>
-        <p class="text-muted mt-2">
-          Не удалось найти информацию о платеже.
-        </p>
         <UButton
           to="/"
           label="Вернуться в магазин"

@@ -198,7 +198,7 @@ async function onSubmit() {
       purchaseResult.value = { status: 'pending', id: result.id }
     }
   } catch (err: any) {
-    purchaseError.value = err?.data?.message || err?.data?.error || 'Произошла ошибка при создании платежа'
+    purchaseError.value = err?.data?.message || err?.data?.error || 'Не удалось создать платёж'
   } finally {
     purchasing.value = false
   }
@@ -211,6 +211,7 @@ async function onSubmit() {
     :ui="{
       content: 'sm:max-w-3xl'
     }"
+    scrollable
   >
     <template #content>
       <div class="flex flex-col sm:flex-row">
@@ -317,7 +318,7 @@ async function onSubmit() {
               v-if="product.servers.length > 1"
               class="text-[11px] text-muted mt-1.5"
             >
-              Товар будет выдан на каждом из перечисленных серверов.
+              Выдаётся на каждом из этих серверов.
             </p>
           </div>
         </div>
@@ -369,20 +370,10 @@ async function onSubmit() {
               name="i-lucide-triangle-alert"
               class="size-5 text-warning shrink-0 mt-0.5"
             />
-            <div>
-              <p class="text-sm font-medium text-warning">
-                Предупреждение
-              </p>
-              <p class="text-xs text-muted mt-0.5">
-                Некоторые товары (например блоки) могут быть выданы только если вы находитесь на сервере.
-              </p>
-            </div>
+            <p class="text-sm text-muted">
+              Некоторые товары, например блоки, выдаются только когда вы на сервере.
+            </p>
           </div>
-
-          <!-- Form -->
-          <p class="text-sm font-medium mb-3">
-            Для покупки товара заполните форму ниже:
-          </p>
 
           <UForm
             :schema="schema"
@@ -393,7 +384,7 @@ async function onSubmit() {
             <UFormField name="nickname">
               <UInput
                 v-model="state.nickname"
-                placeholder="Введите никнейм"
+                placeholder="Никнейм"
                 icon="i-lucide-user"
                 size="lg"
                 class="w-full"
@@ -404,7 +395,7 @@ async function onSubmit() {
               <UInput
                 v-model="state.email"
                 type="email"
-                placeholder="Введите почту"
+                placeholder="Email"
                 icon="i-lucide-mail"
                 size="lg"
                 class="w-full"
@@ -418,7 +409,7 @@ async function onSubmit() {
               <UInput
                 v-model.number="state.count"
                 type="number"
-                placeholder="Введите количество"
+                placeholder="Количество"
                 icon="i-lucide-bolt"
                 size="lg"
                 :min="1"
@@ -465,7 +456,7 @@ async function onSubmit() {
                 </p>
                 <p class="text-xs text-muted mt-0.5">
                   <template v-if="preview?.reference">
-                    Учтена стоимость "{{ preview.reference.productName }}" - вы уже владеете этой позицией.
+                    Учтена стоимость "{{ preview.reference.productName }}".
                   </template>
                 </p>
               </div>

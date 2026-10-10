@@ -4,12 +4,6 @@ export interface ProductPromotion {
   discountPercent: number
 }
 
-export interface ProductGroup {
-  id: string
-  name: string
-  upgradeMode: boolean
-}
-
 export interface ProductServer {
   id: string
   name: string
@@ -23,16 +17,12 @@ export interface Product {
   quantity: number
   description: string
   type: string
-  commands: string[]
   imageUrl?: string
   allowCustomCount: boolean
   activePromotions?: ProductPromotion[]
   discountPercent?: number
   discountedPrice?: number
-  groups?: ProductGroup[]
   servers?: ProductServer[]
-  createdAt: string
-  updatedAt: string
 }
 
 export const useProductsStore = defineStore('products', () => {

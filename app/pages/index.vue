@@ -13,7 +13,7 @@ onMounted(() => {
 
 useShopSeo({
   description: settings.description
-    || `Купить донат на сервер ${settings.ip || settings.name}: привилегии, предметы, валюта и многое другое. Мгновенная выдача после оплаты.`
+    || `Купить донат на сервер ${settings.ip || settings.name}: привилегии, предметы и валюта. Выдача сразу после оплаты.`
 })
 
 const currencyCodes = new Set(['RUB', 'USD', 'EUR'])

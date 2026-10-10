@@ -155,7 +155,7 @@ async function onSubmit() {
       cart.clear()
     }
   } catch (err: any) {
-    purchaseError.value = err?.data?.message || err?.data?.error || 'Произошла ошибка при создании платежа'
+    purchaseError.value = err?.data?.message || err?.data?.error || 'Не удалось создать платёж'
   } finally {
     purchasing.value = false
   }
@@ -347,7 +347,7 @@ async function onSubmit() {
             <UFormField name="nickname">
               <UInput
                 v-model="state.nickname"
-                placeholder="Введите никнейм"
+                placeholder="Никнейм"
                 icon="i-lucide-user"
                 size="lg"
                 class="w-full"
@@ -358,7 +358,7 @@ async function onSubmit() {
               <UInput
                 v-model="state.email"
                 type="email"
-                placeholder="Введите почту"
+                placeholder="Email"
                 icon="i-lucide-mail"
                 size="lg"
                 class="w-full"
