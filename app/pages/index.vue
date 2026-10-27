@@ -8,12 +8,12 @@ const toast = useToast()
 const requestUrl = useRequestURL()
 
 onMounted(() => {
-  if (settings.cartEnabled) cart.reconcile(productsStore.items)
+  if (settings.fields.cartEnabled) cart.reconcile(productsStore.items)
 })
 
 useShopSeo({
-  description: settings.description
-    || `Купить донат на сервер ${settings.ip || settings.name}: привилегии, предметы и валюта. Выдача сразу после оплаты.`
+  description: settings.fields.description
+    || `Купить донат на сервер ${settings.fields.ip || settings.fields.name}: привилегии, предметы и валюта. Выдача сразу после оплаты.`
 })
 
 const currencyCodes = new Set(['RUB', 'USD', 'EUR'])
@@ -36,13 +36,13 @@ const jsonLd = computed(() => {
   return {
     '@context': 'https://schema.org',
     '@type': 'Store',
-    'name': settings.name,
-    'description': settings.description || undefined,
+    'name': settings.fields.name,
+    'description': settings.fields.description || undefined,
     'url': siteUrl,
     'image': `${siteUrl}/og-image.png`,
     'hasOfferCatalog': {
       '@type': 'OfferCatalog',
-      'name': `${settings.name} - товары`,
+      'name': `${settings.fields.name} - товары`,
       'itemListElement': offers
     }
   }
@@ -92,7 +92,7 @@ function openPurchase(productId: string) {
 // Card button: add to cart when the cart feature is on, otherwise fall back to
 // the original one-click purchase modal.
 function onProductAction(productId: string) {
-  if (!settings.cartEnabled) {
+  if (!settings.fields.cartEnabled) {
     openPurchase(productId)
     return
   }
@@ -129,8 +129,8 @@ function onProductAction(productId: string) {
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <!-- Hero -->
     <ShopHeroBanner
-      :title="settings.name"
-      :server-ip="settings.ip"
+      :title="settings.fields.name"
+      :server-ip="settings.fields.ip"
     />
 
     <!-- Filters -->
@@ -174,7 +174,7 @@ function onProductAction(productId: string) {
         :discount-percent="product.discountPercent"
         :discounted-price="product.discountedPrice"
         :servers="product.servers"
-        :cart-mode="settings.cartEnabled"
+        :cart-mode="settings.fields.cartEnabled"
         @add-to-cart="onProductAction"
       />
     </div>
