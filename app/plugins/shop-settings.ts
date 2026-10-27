@@ -1,19 +1,4 @@
-import type { SupportedCurrency, CurrencyRates } from '~/stores/shopSettings'
-
-interface ShopSettingsData {
-  name: string
-  description: string
-  color: string
-  ip: string
-  shopUrl: string
-  ownerName: string
-  ownerType: '' | 'individual' | 'self_employed' | 'sole_proprietor' | 'legal_entity'
-  ownerInn: string
-  contactEmail: string
-  cartEnabled?: boolean
-  baseCurrency?: SupportedCurrency
-  currencyRates?: CurrencyRates
-}
+import type { ShopSettingsData } from '~/stores/shopSettings'
 
 const CACHE_TTL = 30_000
 let cached: { value: ShopSettingsData, expires: number } | null = null
@@ -36,6 +21,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   if (data.value) {
     settings.apply(data.value)
-    appConfig.ui.colors.primary = data.value.color
+    appConfig.ui.colors.primary = settings.fields.color
   }
 })

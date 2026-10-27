@@ -35,7 +35,7 @@ function openCheckout() {
                 class="size-4 text-white"
               />
             </div>
-            <span class="text-lg font-bold tracking-tight">{{ settings.name }}</span>
+            <span class="text-lg font-bold tracking-tight">{{ settings.fields.name }}</span>
           </NuxtLink>
 
           <!-- Nav links (desktop) -->
@@ -56,7 +56,7 @@ function openCheckout() {
             <ShopCurrencySwitcher />
             <!-- ClientOnly: cart count comes from localStorage, so SSR would
                  render 0 and mismatch the hydrated value. -->
-            <ClientOnly v-if="settings.cartEnabled">
+            <ClientOnly v-if="settings.fields.cartEnabled">
               <UButton
                 variant="ghost"
                 color="neutral"
@@ -88,7 +88,7 @@ function openCheckout() {
     </main>
 
     <!-- Cart (opt-in) -->
-    <template v-if="settings.cartEnabled">
+    <template v-if="settings.fields.cartEnabled">
       <ShopCartDrawer
         v-model:open="cartOpen"
         @checkout="openCheckout"
@@ -110,13 +110,13 @@ function openCheckout() {
             </div>
             <div>
               <p class="font-bold">
-                {{ settings.name }}
+                {{ settings.fields.name }}
               </p>
               <p
-                v-if="settings.description"
+                v-if="settings.fields.description"
                 class="text-sm text-muted"
               >
-                {{ settings.description }}
+                {{ settings.fields.description }}
               </p>
             </div>
           </div>
@@ -145,7 +145,7 @@ function openCheckout() {
 
         <!-- Footer bottom -->
         <div class="border-t border-default py-4 text-center text-sm text-muted">
-          <p>&copy; {{ new Date().getFullYear() }} {{ settings.name }}. Все права защищены.</p>
+          <p>&copy; {{ new Date().getFullYear() }} {{ settings.fields.name }}. Все права защищены.</p>
           <p class="mt-1">
             Сайт создан
             <NuxtLink

@@ -15,7 +15,7 @@
  */
 
 interface UseShopSeoOptions {
-  /** Override the default title (which is `settings.name`). */
+  /** Override the default title (which is `settings.fields.name`). */
   title?: string
   /** Override the default description. */
   description?: string
@@ -43,11 +43,11 @@ export function useShopSeo(options: UseShopSeoOptions = {}) {
     (settings.shopUrl || requestUrl.origin).replace(/\/+$/, '')
   )
 
-  const title = computed(() => options.title ?? settings.name)
+  const title = computed(() => options.title ?? settings.fields.name)
   const description = computed(() => {
     if (options.description) return options.description
-    if (settings.description) return settings.description
-    return `Донат-магазин ${settings.name}${settings.ip ? ` для сервера ${settings.ip}` : ''}`
+    if (settings.fields.description) return settings.fields.description
+    return `Донат-магазин ${settings.fields.name}${settings.fields.ip ? ` для сервера ${settings.fields.ip}` : ''}`
   })
 
   const canonical = computed(() => `${siteUrl.value}${options.path ?? route.path}`)
@@ -69,7 +69,7 @@ export function useShopSeo(options: UseShopSeoOptions = {}) {
     ogDescription: () => description.value,
     ogUrl: () => canonical.value,
     ogImage: () => image.value,
-    ogSiteName: () => settings.name,
+    ogSiteName: () => settings.fields.name,
     ogLocale: 'ru_RU',
 
     // Twitter Card
@@ -85,7 +85,7 @@ export function useShopSeo(options: UseShopSeoOptions = {}) {
     ],
     meta: [
       // Tracks the configured primary color, falling back to a sensible blue.
-      { name: 'theme-color', content: () => themeColorHex(settings.color) }
+      { name: 'theme-color', content: () => themeColorHex(settings.fields.color) }
     ]
   })
 

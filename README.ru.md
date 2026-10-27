@@ -84,8 +84,73 @@ app/
   plugins/       client/server плагины
   stores/        Pinia‑сторы
 public/          статические ассеты
-server/          Nuxt server routes (если есть)
+server/          Nuxt server routes
+shared/
+  shop-settings.ts  схема настроек магазина
+  utils/            общий код app и server
 ```
+
+## Свои настройки магазина
+
+Форк сам объявляет, какие настройки ему нужны. Панель читает схему с `{shopUrl}/api/settings-schema` и строит по ней страницу «Настройки магазина», бекенд проверяет и хранит значения.
+
+1. Добавьте поле в `shared/shop-settings.ts`:
+
+   ```ts
+   { key: 'logo', type: 'image', label: 'Логотип' }
+   ```
+
+2. Прочитайте значение в магазине, тип выводится из схемы:
+
+   ```ts
+   const logo = useShopField('logo')
+   // или
+   const settings = useShopSettingsStore()
+   settings.fields.logo
+   ```
+
+3. Задеплойте магазин. Поле появится в панели, бекенд и панель менять не нужно.
+
+Пока админ не сохранил значение, магазин получает `default` из схемы.
+
+### Типы полей
+
+| `type` | Значение | Свойства |
+| --- | --- | --- |
+| `text`, `textarea` | `string` | `min`, `max` (длина), `pattern`, `rows` |
+| `number` | `number \| null` | `min`, `max`, `step`, `integer` |
+| `boolean` | `boolean` | |
+| `select` | `string`, при `multiple: true` - `string[]` | `options: [{ value, label }]`, `multiple`, `min`/`max` (сколько выбрать) |
+| `color` | `string` | `format: 'hex'` (`#rrggbb`, по умолчанию) или `'tailwind'` (`sky`, `emerald`, ...) |
+| `url`, `email` | `string` | |
+| `date`, `datetime` | `string` | `date` - `YYYY-MM-DD`, `datetime` - ISO |
+| `image` | `string` (URL) | загрузка в панели или ссылка |
+| `file` | `string` (URL) | загрузка в панели или ссылка, `accept` |
+| `list` | массив объектов | `fields` (любые типы, кроме `list`), `min`, `max`, `titleKey`, `addLabel` |
+
+Общие свойства: `key`, `label`, `description`, `placeholder`, `icon`, `required`, `default`, `visibleIf: { key, equals }` - поле видно, только если другое поле равно `equals` (или одному из значений, если это массив).
+
+Список баннеров:
+
+```ts
+{
+  key: 'banners',
+  type: 'list',
+  label: 'Баннеры',
+  max: 5,
+  titleKey: 'title',
+  addLabel: 'Добавить баннер',
+  fields: [
+    { key: 'title', type: 'text', label: 'Заголовок', required: true },
+    { key: 'image', type: 'image', label: 'Картинка', required: true },
+    { key: 'link', type: 'url', label: 'Ссылка' }
+  ]
+}
+```
+
+- Значения отдаёт публичный `GET /shop-settings`, секреты в полях не храните.
+- `name`, `ip`, `contactEmail` и `cartEnabled` читает бекенд (письма и корзина), тип этих ключей менять нельзя.
+- Картинки и файлы загружаются на бекенд, лимит размера - `UPLOADS_MAX_FILE_SIZE` (по умолчанию 10 МБ).
 
 ## Скрипты
 

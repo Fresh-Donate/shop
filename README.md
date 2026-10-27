@@ -84,8 +84,73 @@ app/
   plugins/       client/server plugins
   stores/        Pinia stores
 public/          static assets
-server/          Nuxt server routes (if any)
+server/          Nuxt server routes
+shared/
+  shop-settings.ts  shop settings schema
+  utils/            code shared by app and server
 ```
+
+## Custom shop settings
+
+A fork declares the settings it needs. The panel reads the schema from `{shopUrl}/api/settings-schema` and renders the "Shop settings" page from it; the backend validates and stores the values.
+
+1. Add a field to `shared/shop-settings.ts`:
+
+   ```ts
+   { key: 'logo', type: 'image', label: 'Logo' }
+   ```
+
+2. Read the value in the shop, the type is inferred from the schema:
+
+   ```ts
+   const logo = useShopField('logo')
+   // or
+   const settings = useShopSettingsStore()
+   settings.fields.logo
+   ```
+
+3. Deploy the shop. The field shows up in the panel, no backend or panel changes needed.
+
+Until the admin saves a value, the shop gets the field's `default`.
+
+### Field types
+
+| `type` | Value | Options |
+| --- | --- | --- |
+| `text`, `textarea` | `string` | `min`, `max` (length), `pattern`, `rows` |
+| `number` | `number \| null` | `min`, `max`, `step`, `integer` |
+| `boolean` | `boolean` | |
+| `select` | `string`, `string[]` with `multiple: true` | `options: [{ value, label }]`, `multiple`, `min`/`max` (selection count) |
+| `color` | `string` | `format: 'hex'` (`#rrggbb`, default) or `'tailwind'` (`sky`, `emerald`, ...) |
+| `url`, `email` | `string` | |
+| `date`, `datetime` | `string` | `date` is `YYYY-MM-DD`, `datetime` is ISO |
+| `image` | `string` (URL) | upload in the panel or a link |
+| `file` | `string` (URL) | upload in the panel or a link, `accept` |
+| `list` | array of objects | `fields` (any type except `list`), `min`, `max`, `titleKey`, `addLabel` |
+
+Common options: `key`, `label`, `description`, `placeholder`, `icon`, `required`, `default`, `visibleIf: { key, equals }` - the field is shown only when another field equals `equals` (or one of its values when it is an array).
+
+A banner list:
+
+```ts
+{
+  key: 'banners',
+  type: 'list',
+  label: 'Banners',
+  max: 5,
+  titleKey: 'title',
+  addLabel: 'Add banner',
+  fields: [
+    { key: 'title', type: 'text', label: 'Title', required: true },
+    { key: 'image', type: 'image', label: 'Image', required: true },
+    { key: 'link', type: 'url', label: 'Link' }
+  ]
+}
+```
+
+- Values are served by the public `GET /shop-settings`, don't keep secrets in fields.
+- `name`, `ip`, `contactEmail` and `cartEnabled` are read by the backend (emails and cart), their types can't change.
+- Images and files are uploaded to the backend, the size limit is `UPLOADS_MAX_FILE_SIZE` (10 MB by default).
 
 ## Scripts
 

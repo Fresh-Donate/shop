@@ -1,62 +1,33 @@
-export type OwnerType = '' | 'individual' | 'self_employed' | 'sole_proprietor' | 'legal_entity'
+import { shopSettingsSchema } from '#shared/shop-settings'
+
 export type SupportedCurrency = 'RUB' | 'USD' | 'EUR'
 export type CurrencyRates = Partial<Record<SupportedCurrency, number>>
+export type ShopSettingsFields = ShopSettingsValues<typeof shopSettingsSchema>
 
-interface ShopSettingsData {
-  name: string
-  description: string
-  ip: string
-  color: string
-  shopUrl: string
-  ownerName: string
-  ownerType: OwnerType
-  ownerInn: string
-  contactEmail: string
-  cartEnabled?: boolean
+export interface ShopSettingsData {
+  shopUrl?: string
+  fields?: Record<string, unknown>
   baseCurrency?: SupportedCurrency
   currencyRates?: CurrencyRates
 }
 
 export const useShopSettingsStore = defineStore('shopSettings', () => {
-  const name = ref('FreshDonate Shop')
-  const description = ref('')
-  const color = ref('sky')
-  const ip = ref('play.example.com')
+  const fields = ref<ShopSettingsFields>(resolveShopFields(shopSettingsSchema, {}))
   const shopUrl = ref('')
-  const ownerName = ref('')
-  const ownerType = ref<OwnerType>('')
-  const ownerInn = ref('')
-  const contactEmail = ref('')
-  const cartEnabled = ref(false)
   const baseCurrency = ref<SupportedCurrency>('RUB')
   const currencyRates = ref<CurrencyRates>({ USD: 95, EUR: 100 })
 
   function apply(data: ShopSettingsData) {
-    name.value = data.name
-    description.value = data.description
-    color.value = data.color
-    ip.value = data.ip
+    // Older backends have no `fields` and send the same keys flat.
+    fields.value = resolveShopFields(shopSettingsSchema, data.fields ?? data)
     shopUrl.value = (data.shopUrl || '').replace(/\/+$/, '')
-    ownerName.value = data.ownerName || ''
-    ownerType.value = (data.ownerType || '') as OwnerType
-    ownerInn.value = data.ownerInn || ''
-    contactEmail.value = data.contactEmail || ''
-    cartEnabled.value = data.cartEnabled ?? false
     if (data.baseCurrency) baseCurrency.value = data.baseCurrency
     if (data.currencyRates) currencyRates.value = data.currencyRates
   }
 
   return {
-    name,
-    description,
-    ip,
-    color,
+    fields,
     shopUrl,
-    ownerName,
-    ownerType,
-    ownerInn,
-    contactEmail,
-    cartEnabled,
     baseCurrency,
     currencyRates,
     apply

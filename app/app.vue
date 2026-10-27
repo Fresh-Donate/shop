@@ -4,7 +4,7 @@ const settings = useShopSettingsStore()
 useHead({
   htmlAttrs: { lang: 'ru' },
   titleTemplate: (chunk?: string) => {
-    const name = settings.name || 'FreshDonate Shop'
+    const name = settings.fields.name || 'FreshDonate Shop'
     if (!chunk || chunk === name) return name
     return `${chunk} - ${name}`
   },

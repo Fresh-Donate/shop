@@ -7,7 +7,7 @@ export function useLegalInfo() {
   const NOT_SPECIFIED = 'не указано'
 
   const ownerTypeLabel = computed(() => {
-    switch (settings.ownerType) {
+    switch (settings.fields.ownerType) {
       case 'individual': return 'Физическое лицо'
       case 'self_employed': return 'Самозанятый (плательщик НПД)'
       case 'sole_proprietor': return 'Индивидуальный предприниматель'
@@ -16,14 +16,14 @@ export function useLegalInfo() {
     }
   })
 
-  const ownerName = computed(() => settings.ownerName || NOT_SPECIFIED)
+  const ownerName = computed(() => settings.fields.ownerName || NOT_SPECIFIED)
   const ownerType = computed(() => ownerTypeLabel.value || NOT_SPECIFIED)
-  const ownerInn = computed(() => settings.ownerInn || NOT_SPECIFIED)
-  const contactEmail = computed(() => settings.contactEmail || NOT_SPECIFIED)
-  const hasContactEmail = computed(() => !!settings.contactEmail)
+  const ownerInn = computed(() => settings.fields.ownerInn || NOT_SPECIFIED)
+  const contactEmail = computed(() => settings.fields.contactEmail || NOT_SPECIFIED)
+  const hasContactEmail = computed(() => !!settings.fields.contactEmail)
 
-  const shopName = computed(() => settings.name)
-  const serverIp = computed(() => settings.ip || NOT_SPECIFIED)
+  const shopName = computed(() => settings.fields.name)
+  const serverIp = computed(() => settings.fields.ip || NOT_SPECIFIED)
 
   const requestUrl = useRequestURL()
   const shopUrl = computed(() =>
